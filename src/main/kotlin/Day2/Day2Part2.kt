@@ -1,7 +1,6 @@
 package com.example.Day2
 
 import com.example.readFileToString
-import com.example.repeatWord
 
 
 fun main(){
@@ -30,3 +29,11 @@ fun main(){
     }
     println(resIdSum)
 }
+
+fun repeatWord(word: String, times: Int) : String{
+    val sb = StringBuilder(word.length*times)
+    repeat(times){sb.append(word)}
+    return sb.toString()
+}
+
+
