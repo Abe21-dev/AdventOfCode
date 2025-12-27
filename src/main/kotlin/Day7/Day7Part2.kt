@@ -34,79 +34,42 @@ import java.util.LinkedList
  *
  */
 
+val memo = mutableMapOf<Pair<Int, Int>, Long>()
+
 fun main() {
-    val input = readFileToString("src/main/kotlin/Day7/Day7Test.txt").split("\n").map { it.split("").toMutableList() }
+    val input = readFileToString("src/main/kotlin/Day7/Day7Input.txt").split("\n").map { it.split("").toMutableList() }
     val q = LinkedList<TrieNode>()
     // find the first value
-    val rootNode = TrieNode("S", 0 to input[0].indexOf("S"))
-    q.add(rootNode)
-    val seenIdx = mutableSetOf<Pair<Int, Int>>()
-
-
-    while (!q.isEmpty()) {
-        val node = q.poll()
-        println("exploring ${node.value}")
-        val idx = node.idx
-
-        if (input[idx.first][idx.second] == "^") {
-
-            val leftIdx = idx.first to idx.second - 1
-            val rightIdx = idx.first to idx.second + 1
-            if (inBounds(leftIdx, input)) {
-                val leftNode = TrieNode(input[leftIdx.first][leftIdx.second], leftIdx)
-                node.next.add(leftNode)
-                println("left node Added: ${leftNode.value}")
-
-                if (leftIdx !in seenIdx) {
-                    q.add(leftNode)
-                    seenIdx.add(leftIdx)
-                }
-            }
-            if (inBounds(rightIdx, input)) {
-                val rightNode = TrieNode(input[rightIdx.first][rightIdx.second], rightIdx)
-                node.next.add(rightNode)
-                println("right node Added: ${rightNode.value}")
-                if (rightIdx !in seenIdx) {
-                    q.add(rightNode)
-                    seenIdx.add(rightIdx)
-                }
-            }
-        } else {
-            val newIdx = idx.first + 1 to idx.second
-            if (inBounds(newIdx, input)) {
-                val newNode = TrieNode(input[newIdx.first][newIdx.second], newIdx)
-                node.next.add(newNode)
-                println("new node Added: ${newNode.value}")
-
-                if (newIdx !in seenIdx) {
-                    q.add(newNode)
-                    seenIdx.add(newIdx)
-                }
-            }
-        }
-    }
-    val boxedInt = mutableListOf(0)
-    val unqString = mutableSetOf<String>()
-    println(rootNode)
-    dfsTrie(rootNode, boxedInt)
-
-    println(unqString)
-    println(boxedInt)
-
-
+    val counter = mutableListOf(0)
+    val root = 1 to input[0].indexOf("S")
+   println( dfsTrie(root, input))
 
 }
 
-fun dfsTrie(n: TrieNode,  boxedLeafCounter: MutableList<Int>) {
-
-    if(n.next.isEmpty()){
-        boxedLeafCounter[0]++
-        return
+fun dfsTrie(idx: Pair<Int, Int>, input: List<MutableList<String>>) : Long {
+    if(!inBounds(idx, input)){
+        return 1
     }
-    for (nextNode in n.next) {
-        dfsTrie(nextNode, boxedLeafCounter)
+    if (idx in memo){
+        if(memo[idx] == null){
+            println("Panic")
+        }
+        return  memo[idx] ?: 0
     }
+    val curr = input[idx.first][idx.second]
 
+    var result = 0L
+    if (curr == "^"){
+        val leftIdx = idx.first+1 to idx.second - 1
+        val rightIdx = idx.first+1 to idx.second + 1
+        result =  dfsTrie(leftIdx, input)+dfsTrie(rightIdx, input)
+    }
+    else if (curr =="."){
+        val newIdx = idx.first + 1 to idx.second
+        result  = dfsTrie(newIdx, input)
+    }
+    memo[idx] = result
+    return  result
 }
 
 fun <T> inBounds(idx: Pair<Int, Int>, input: List<List<T>>): Boolean {
